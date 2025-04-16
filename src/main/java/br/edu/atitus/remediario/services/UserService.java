@@ -4,11 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.edu.atitus.remediario.entities.ProfileEntity;
 import br.edu.atitus.remediario.entities.UserEntity;
 import br.edu.atitus.remediario.repositories.UserRepository;
 
@@ -21,8 +19,7 @@ public class UserService implements UserDetailsService{
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ProfileService perfilService;
-    @Autowired
+    
     private PasswordEncoder encoder;
 
     private static final String EMAIL_REGEX = "^[\\w-\\.]+@[\\w-]+\\.[a-zA-Z]{2,}$";
@@ -45,12 +42,7 @@ public class UserService implements UserDetailsService{
         userRepository.save(user); // Salva o usuário com a imagem atualizada
     }
     
-    public void deleteUser(UUID userId) {
-    	perfilService.deleteProfileByUserId(userId);
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + userId));
-        userRepository.delete(user);
-    }
+    
 
     
     public UserEntity saveUser(UserEntity user) {
@@ -58,13 +50,6 @@ public class UserService implements UserDetailsService{
         validarSenha(user.getPassword());
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
-        var perfis = perfilService.findByUser(user);
-        if (perfis.isEmpty()) {
-        	ProfileEntity perfil = new ProfileEntity();
-        	perfil.setUser(user);
-        	perfil.setName(user.getName());
-        	perfilService.savePerfil(perfil);
-        }
         ;
         return user;
     }
